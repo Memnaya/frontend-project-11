@@ -1,5 +1,6 @@
 build:
-	npx webpack serve
+	rm -rf dist
+	NODE_ENV=production npx webpack
 
 install:
 	npm ci
@@ -10,6 +11,5 @@ lint:
 lint-fix:
 	npx eslint . --fix
 
-build:
-	rm -rf dist
-	NODE_ENV=production npx webpack
+server:
+	npx webpack serve
