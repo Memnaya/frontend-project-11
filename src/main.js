@@ -1,25 +1,38 @@
-// import { setupCounter } from './counter.js'
+import Model from './model';
+import View from './view';
+import { feedSchema } from './validators';
 
-document.querySelector('#app').innerHTML = `
-  <div class="app-wrapper app-form d-flex flex-column align-items-center">
-    <h1>RSS-агрегатор</h1>
-    <form action="/add-feed" method="post" class="app-form d-flex flex-column align-items-center justify-content-center">
-      <label for="rss-url" class="mb-2">Введите URL RSS-потока:</label>
-      <input
-      id="rss-url"
-      type="text"
-      name="rss-url"
-      required
-      placeholder="https://example.com/feed.xml"
-      class="mb-2"
-      >
-      <button type="submit"
-      class="btn btn-primary"
-      >
-        Добавить
-      </button>
-    </form>
- </div>
-`
+const model = new Model({ feedSchema });
 
-// setupCounter(document.querySelector('#counter'))
+const controller = {
+  model,
+  addFeed(url) {
+    const formData = { url };
+    const context = { duplicates: model.data.feeds }
+
+    model.validate(formData, context)
+      .then(({ valid, errors }) => {
+        model.validate(formData, context).then(result => {
+          console.log('Результат валидации:', result);
+        });
+        if (valid) {
+          model.data.feeds.push(formData.url);
+          model.data.formState.valid = true;
+          model.data.formState.errors.url = '';
+
+          view.resetForm();
+        } else {
+          model.data.formState.valid = false;
+          model.data.formState.errors.url = errors?.url || 'Ошибка валидации'
+          view.renderFormState();
+        }
+      })
+      // .catch((err) => {
+      //   model.data.formState.valid = false;
+      //   model.data.formState.errors = {};
+      //   model.data.formState.errors.url = err.message;
+      // });
+  }
+};
+
+const view = new View(controller);
